@@ -47,7 +47,15 @@ map.on('load', () => {
         source: 'buildings-mvt',
         'source-layer': 'buildings_demo',
         paint: {
-            'circle-radius': 5,
+            'circle-radius': [
+                'interpolate',
+                ['linear'],
+                ['coalesce', ['to-number', ['get', 'tilavuus']], 0],
+                0, 3,
+                1000, 5,
+                5000, 10,
+                10000, 15
+            ],
             'circle-color': [
                 'match',
                 ['get', 'kantavien_rakenteiden_rakennusaine'],
