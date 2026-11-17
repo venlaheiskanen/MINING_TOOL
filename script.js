@@ -6,118 +6,85 @@ const map = new maplibregl.Map({
     zoom: 14
 });
 
-// Load data and layers once the map has finished loading
+// Display map errors in the browser console
+map.on('error', (e) => {
+    console.error('MapLibre error:', e.error);
+});
+
+// Wait until the map style has loaded
 map.on('load', () => {
 
-    // Load data and layers once the map has finished loading
-    map.addSource('buildings', {
-        type: 'geojson',
-        data: 'data/buil_polygons.geojson'
+    console.log('MapLibre map loaded successfully');
+
+    // 1. Define the GeoServer WMTS vector tile URL
+    const mvtUrl =
+        'http://localhost:8080/geoserver/gwc/service/wmts' +
+        '?SERVICE=WMTS' +
+        '&VERSION=1.0.0' +
+        '&REQUEST=GetTile' +
+        '&LAYER=eumat:buildings_demo' +
+        '&STYLE=' +
+        '&TILEMATRIXSET=EPSG:900913' +
+        '&TILEMATRIX=EPSG:900913:{z}' +
+        '&TILECOL={x}' +
+        '&TILEROW={y}' +
+        '&FORMAT=application/vnd.mapbox-vector-tile';
+
+    // 2. Add the vector tile source
+    map.addSource('buildings-mvt', {
+        type: 'vector',
+        tiles: [mvtUrl],
+        minzoom: 0,
+        maxzoom: 14
     });
-    
-    // Add the building layer to the ma
+
+    // 3. Add the building point layer
+    const BUILDING_LAYER = 'buildings-mvt-points';
+
     map.addLayer({
-        id: 'buildings-layer',
-        type: 'fill',
-        source: 'buildings',
+        id: BUILDING_LAYER,
+        type: 'circle',
+        source: 'buildings-mvt',
+        'source-layer': 'buildings_demo',
         paint: {
-            'fill-color': '#ff5500',
-            'fill-opacity': 0.6
+            'circle-radius': 5,
+            'circle-color': '#e63946',
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 1
         }
     });
 
-    // Define constants for reuse
-    const BUILDING_LAYER = 'buildings-layer';
-    const BUILDING_ID_FIELD = 'id';
+    console.log('Building MVT layer added');
 
-    // Change cursor to pointer when hovering over a building
+    // 4. Change cursor when hovering over buildings
     map.on('mouseenter', BUILDING_LAYER, () => {
         map.getCanvas().style.cursor = 'pointer';
     });
 
-    // Reset cursor when leaving a building feature
     map.on('mouseleave', BUILDING_LAYER, () => {
         map.getCanvas().style.cursor = '';
-    });    
-
-    // Show a popup when a building is clicked
-    map.on('click', BUILDING_LAYER, (e) => {
-
-        // e.features contains all features at the click location;
-        // e.features[0] is the topmost feature
-        const feature = e.features && e.features[0];
-        if (!feature) return;  // Exit if no feature was clicked
-
-        const props = feature.properties || {};
-        const buildingId = props?.[BUILDING_ID_FIELD];
-
-        // Warn if the expected building ID attribute is missing
-        if (buildingId == null) {
-            console.warn(`Puuttuu kenttä ${BUILDING_ID_FIELD}`, props);
-        }
-   
-
-        // Fields to be shown in the popup, with units and formatting
-        const popupFields = [
-        {
-            key: "year",
-            label: "Building year"
-        },
-     //   {
-     //       key: "MI_wood",
-     //       label: "Wood material intensity",
-     //       unit: "tonnes",
-     //       format: (v) => v.toFixed(1)
-     //   },
-        {
-            key: "company_wood",
-            label: "Wood waste processing facility"
-        },
-     //   {
-     //       key: "MI_concrete",
-     //       label: "Concrete material intensity",
-     //       unit: "tonnes",
-     //       format: (v) => v.toFixed(1)
-     //   },
-        {
-            key: "company_conc",
-            label: "Concrete waste processing facility"
-        },
-        ];
-
-
-        // Build the popup HTML conten
-
-        const html = `                                   
-            <div style="min-width:180px">
-                <strong>Kohde</strong><br/>
-                 ${
-                    popupFields
-                    .map(({ key, label, unit, format }) => {
-                        const value = props[key];
-                        if (value == null) return null;
-
-                        const formattedValue = format
-                        ? format(Number(value))
-                        : value;
-
-                    return `<strong>${label}:</strong> ${formattedValue}${unit ? " " + unit : ""}`;
-                })
-                .filter(Boolean)
-                .join("<br/>")
-            }
-            </div>
-        `;
-
-        // Create and display the popup at the click locatio
-        new maplibregl.Popup({ closeButton: true, closeOnClick: true})  // Luo pop up-ikkunan
-            .setLngLat(e.lngLat)                                          //Pop upin sijainti klikatun pisteen kohdalle
-            .setHTML(html)                                              // Asetetaan HTML sisältö pop uppiin
-            .addTo(map);                                                // Pop up näkyviin kartalle
-
-
-        });
     });
 
-// Add zoom and rotation controls to the map
-map.addControl(new maplibregl.NavigationControl());
+    // 5. Show building properties when clicked
+    map.on('click', BUILDING_LAYER, (e) => {
+        const feature = e.features?.[0];
+        if (!feature) return;
+
+        const props = feature.properties || {};
+
+        console.log('Clicked building:', props);
+
+        const purpose = props.paaasiallinen_kayttotarkoitus
+            ?? 'Ei tiedossa';
+
+        const volume = props.tilavuus != null
+            ? `${props.tilavuus} m³`
+            : 'Ei tiedossa';
+
+        new maplibregl.Popup()
+            .setLngLat(e.lngLat)
+            .setText(`Käyttötarkoitus: ${purpose} | Tilavuus: ${volume}`)
+            .addTo(map);
+    });
+
+}); // End of map.on('load')
