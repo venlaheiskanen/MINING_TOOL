@@ -69,10 +69,23 @@ map.on('load', () => {
         }
     });
 
-    map.setFilter(
-        BUILDING_LAYER,
-        null
-    );
+    const materialFilter = document.getElementById('material-filter');
+
+    materialFilter.addEventListener('change', (event) => {
+        const selectedMaterial = event.target.value;
+
+        if (selectedMaterial === 'all') {
+            // Show all buildings
+            map.setFilter(BUILDING_LAYER, null);
+
+        } else {
+            // Show building matching the selected material
+            map.setFilter(
+                BUILDING_LAYER,
+                ['==', ['get', 'kantavien_rakenteiden_rakennusaine'], selectedMaterial])};
+
+        console.log('Seleted material:', selectedMaterial);
+    });
 
     console.log('Building MVT layer added');
 
