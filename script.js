@@ -48,7 +48,14 @@ map.on('load', () => {
         'source-layer': 'buildings_demo',
         paint: {
             'circle-radius': 5,
-            'circle-color': '#e63946',
+            'circle-color': [
+                'match',
+                ['get', 'kantavien_rakenteiden_rakennusaine'],
+                'Puu', '#2E8B57',
+                'Betoni', '#4A90E2',
+                'Tiili', '#E58D30',
+                '#929292'
+            ],
             'circle-stroke-color': '#ffffff',
             'circle-stroke-width': 1
         }
