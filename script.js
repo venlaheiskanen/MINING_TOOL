@@ -69,6 +69,11 @@ map.on('load', () => {
         }
     });
 
+    map.setFilter(
+        BUILDING_LAYER,
+        null
+    );
+
     console.log('Building MVT layer added');
 
     // 4. Change cursor when hovering over buildings
