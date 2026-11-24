@@ -38,17 +38,20 @@ map.on('load', () => {
         maxzoom: 14
     });
 
-    // 3. Add the building point layer
+    // 3. Visualise building points
     const BUILDING_LAYER = 'buildings-mvt-points';
 
+    const MIN_CIRCLE_RADIUS = 1.5;
+    const MAX_CIRCLE_RADIUS = 10;
+    const CIRCLE_RADIUS_SCALE = 0.25;
 
     function createCircleRadiusExpression(field) {
         return [
-            'max', 1.5,
+            'max', MIN_CIRCLE_RADIUS,
             [
-                'min', 10,
+                'min', MAX_CIRCLE_RADIUS,
                 [
-                    '*', 0.25,
+                    '*', CIRCLE_RADIUS_SCALE,
                     [
                         'sqrt',
                         [
@@ -61,6 +64,12 @@ map.on('load', () => {
         ];
     }
 
+    function calculateCircleRadius(tonnes) {
+        return Math.max(
+            MIN_CIRCLE_RADIUS,
+            Math.min(MAX_CIRCLE_RADIUS, CIRCLE_RADIUS_SCALE * Math.sqrt(tonnes))
+        );
+    }
 
     map.addLayer({
         id: BUILDING_LAYER,
@@ -147,10 +156,7 @@ map.on('load', () => {
         // Create new legend symbols
         settings.legendValues.forEach((tonnes) => {
 
-        const radius = Math.max(
-            1.5,
-            Math.min(10, 0.25 * Math.sqrt(tonnes))
-        );
+        const radius = calculateCircleRadius(tonnes);
 
         const row = document.createElement('div');
         row.className = 'legend-row';
