@@ -41,13 +41,9 @@ map.on('load', () => {
     // 3. Add the building point layer
     const BUILDING_LAYER = 'buildings-mvt-points';
 
-    map.addLayer({
-        id: BUILDING_LAYER,
-        type: 'circle',
-        source: 'buildings-mvt',
-        'source-layer': 'material_stock_import',
-        paint: {
-        'circle-radius': [
+
+    function createCircleRadiusExpression(field) {
+        return [
             'max', 1.5,
             [
                 'min', 10,
@@ -57,12 +53,22 @@ map.on('load', () => {
                         'sqrt',
                         [
                             'max', 0,
-                            ['to-number', ['get', 'material_concrete_t'], 0]
+                            ['to-number', ['get', field], 0]
                         ]
                     ]
                 ]
             ]
-        ],
+        ];
+    }
+
+
+    map.addLayer({
+        id: BUILDING_LAYER,
+        type: 'circle',
+        source: 'buildings-mvt',
+        'source-layer': 'material_stock_import',
+        paint: {
+        'circle-radius': createCircleRadiusExpression('material_concrete_t'),
             'circle-color': '#4A90E2',
             'circle-stroke-color': '#ffffff',
             'circle-stroke-width': 1
@@ -111,16 +117,7 @@ map.on('load', () => {
         map.setPaintProperty(
             BUILDING_LAYER,
             'circle-radius',
-            [
-                'max', 1.5,
-                [
-                    'min', 10,
-                    [
-                        '*', 0.25,
-                        ['sqrt', quantity]
-                    ]
-                ]
-            ]
+            createCircleRadiusExpression(settings.field)
         );
 
         // Update circle colors
