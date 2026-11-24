@@ -16,15 +16,6 @@ map.on('load', () => {
 
     console.log('MapLibre map loaded successfully');
 
-    // Hide all basemap label layers for a cleaner screenshot
-    const baseLayers = map.getStyle().layers;
-
-    baseLayers.forEach((layer) => {
-        if (layer.type === 'symbol') {
-            map.setLayoutProperty(layer.id, 'visibility', 'none');
-        }           
-    });
-
     // 1. Define the GeoServer WMTS vector tile URL
     const mvtUrl =
         'http://localhost:8080/geoserver/gwc/service/wmts' +
