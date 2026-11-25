@@ -1,6 +1,6 @@
 # MINING_TOOL
 
-**IUrban Material Mining Map | EU-MAT Project**
+**Urban Material Mining Map | EU-MAT Project**
 
 ## Overview
 
