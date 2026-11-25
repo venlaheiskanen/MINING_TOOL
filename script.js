@@ -101,41 +101,7 @@ map.on('load', () => {
         }
     };
 
-    function updateMaterialView() {
-
-        const selectedMaterial = materialFilter.value;
-        console.log('Valittu materiaali:', selectedMaterial);
-
-        const settings = materialSettings[selectedMaterial];
-        console.log('Materiaalin asetukset:', settings);
-
-        // Read the estimated material quantity
-        const quantity = [
-            'max',
-            0,
-            ['to-number', ['get', settings.field], 0]
-        ];
-
-        // Filter out buildings below the threshold
-        map.setFilter(
-            BUILDING_LAYER,
-            ['>=', quantity, settings.threshold]
-        );
-
-        // Update circle sizes
-        map.setPaintProperty(
-            BUILDING_LAYER,
-            'circle-radius',
-            createCircleRadiusExpression(settings.field)
-        );
-
-        // Update circle colors
-        map.setPaintProperty(
-            BUILDING_LAYER,
-            'circle-color',
-            settings.color
-        );
-
+    function updateLegend(selectedMaterial, settings) {
         // Update legend title
         const legendTitle = document.getElementById('legend-title');
 
@@ -182,6 +148,45 @@ map.on('load', () => {
 
         legendValues.appendChild(row);
     });
+    }
+
+
+    function updateMaterialView() {
+
+        const selectedMaterial = materialFilter.value;
+        console.log('Valittu materiaali:', selectedMaterial);
+
+        const settings = materialSettings[selectedMaterial];
+        console.log('Materiaalin asetukset:', settings);
+
+        // Read the estimated material quantity
+        const quantity = [
+            'max',
+            0,
+            ['to-number', ['get', settings.field], 0]
+        ];
+
+        // Filter out buildings below the threshold
+        map.setFilter(
+            BUILDING_LAYER,
+            ['>=', quantity, settings.threshold]
+        );
+
+        // Update circle sizes
+        map.setPaintProperty(
+            BUILDING_LAYER,
+            'circle-radius',
+            createCircleRadiusExpression(settings.field)
+        );
+
+        // Update circle colors
+        map.setPaintProperty(
+            BUILDING_LAYER,
+            'circle-color',
+            settings.color
+        );
+
+        updateLegend(selectedMaterial, settings);
     }
 
     materialFilter.addEventListener('change', updateMaterialView);
