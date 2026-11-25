@@ -18,11 +18,11 @@ map.on('load', () => {
 
     // 1. Define the GeoServer WMTS vector tile URL
     const mvtUrl =
-        'http://localhost:8080/geoserver/gwc/service/wmts' +
+        window.APP_CONFIG.geoserverWmtsUrl +
         '?SERVICE=WMTS' +
         '&VERSION=1.0.0' +
         '&REQUEST=GetTile' +
-        '&LAYER=eumat:material_stock_import' +
+        '&LAYER=' + window.APP_CONFIG.buildingsLayerName +
         '&STYLE=' +
         '&TILEMATRIXSET=EPSG:900913' +
         '&TILEMATRIX=EPSG:900913:{z}' +
@@ -75,7 +75,7 @@ map.on('load', () => {
         id: BUILDING_LAYER,
         type: 'circle',
         source: 'buildings-mvt',
-        'source-layer': 'material_stock_import',
+        'source-layer':  window.APP_CONFIG.buildingsSourceLayer,
         paint: {
         'circle-radius': createCircleRadiusExpression('material_concrete_t'),
             'circle-color': '#4A90E2',
