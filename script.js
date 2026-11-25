@@ -150,15 +150,7 @@ map.on('load', () => {
     });
     }
 
-
-    function updateMaterialView() {
-
-        const selectedMaterial = materialFilter.value;
-        console.log('Valittu materiaali:', selectedMaterial);
-
-        const settings = materialSettings[selectedMaterial];
-        console.log('Materiaalin asetukset:', settings);
-
+    function updateBuildingLayer(settings) {
         // Read the estimated material quantity
         const quantity = [
             'max',
@@ -185,7 +177,17 @@ map.on('load', () => {
             'circle-color',
             settings.color
         );
+    }
 
+    function updateMaterialView() {
+
+        const selectedMaterial = materialFilter.value;
+        console.log('Valittu materiaali:', selectedMaterial);
+
+        const settings = materialSettings[selectedMaterial];
+        console.log('Materiaalin asetukset:', settings);
+
+        updateBuildingLayer(settings);
         updateLegend(selectedMaterial, settings);
     }
 
